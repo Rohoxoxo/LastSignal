@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 6374537549862465873}
   - component: {fileID: 2197760142851549075}
   - component: {fileID: 5185170798539859592}
-  - component: {fileID: 7220769153272082787}
   - component: {fileID: 5589644010000862848}
   m_Layer: 0
   m_Name: PlayerBullet
@@ -116,19 +115,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!135 &7220769153272082787
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4474127675458138696}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5589644010000862848
 MonoBehaviour:
   m_ObjectHideFlags: 0
