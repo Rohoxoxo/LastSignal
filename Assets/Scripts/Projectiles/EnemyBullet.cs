@@ -8,7 +8,29 @@ public class EnemyBullet : MonoBehaviour
     public int damage = 1;
     public float lifetime = 4f;
 
-    void Start() => Destroy(gameObject, lifetime);
+    void Start()
+    {
+        Destroy(gameObject, lifetime);
+
+        // Red emissive glow
+        var rend = GetComponent<Renderer>();
+        if (rend != null)
+        {
+            rend.material.color = new Color(1f, 0.1f, 0.05f);
+            rend.material.EnableKeyword("_EMISSION");
+            rend.material.SetColor("_EmissionColor", new Color(2f, 0.1f, 0f));
+        }
+
+        // Red point light
+        var lightGO = new GameObject("EnemyBulletLight");
+        lightGO.transform.SetParent(transform);
+        lightGO.transform.localPosition = Vector3.zero;
+        var l = lightGO.AddComponent<Light>();
+        l.type = LightType.Point;
+        l.color = new Color(1f, 0.1f, 0.05f);
+        l.intensity = 1.8f;
+        l.range = 3f;
+    }
 
     void Update()
     {
