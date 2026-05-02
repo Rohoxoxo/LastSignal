@@ -5,13 +5,15 @@ public class PlayerHealth : MonoBehaviour
     public int maxHealth = 5;
     public int currentHealth { get; private set; }
 
+    private static int persistedHealth = -1;
+
     private bool isShielded;
     private ShieldVisual shieldVisual;
 
     void Awake()
     {
-        currentHealth = maxHealth;
         shieldVisual = GetComponent<ShieldVisual>();
+        currentHealth = persistedHealth > 0 ? persistedHealth : maxHealth;
     }
 
     void Start()
@@ -23,6 +25,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isShielded) return;
         currentHealth -= amount;
+        persistedHealth = currentHealth;
         UIManager.Instance?.UpdateHealthUI(currentHealth, maxHealth);
         UIManager.Instance?.FlashDamage();
         if (currentHealth <= 0)
@@ -32,6 +35,7 @@ public class PlayerHealth : MonoBehaviour
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        persistedHealth = currentHealth;
         UIManager.Instance?.UpdateHealthUI(currentHealth, maxHealth);
         UIManager.Instance?.FlashHeal();
     }
@@ -51,4 +55,6 @@ public class PlayerHealth : MonoBehaviour
     }
 
     public bool IsShielded => isShielded;
+
+    public static void ResetHealth() => persistedHealth = -1;
 }

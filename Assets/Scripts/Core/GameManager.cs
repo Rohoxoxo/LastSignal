@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -23,9 +24,29 @@ public class GameManager : MonoBehaviour
         currentLevelIndex = persistedLevelIndex;
     }
 
+    private bool isGameOver = false;
+    private bool isPaused = false;
+
     void Start()
     {
         UIManager.Instance?.UpdateScoreUI(score);
+    }
+
+    void Update()
+    {
+        if (isGameOver && Input.GetKeyDown(KeyCode.R))
+            RestartGame();
+        if (isGameOver && Input.GetKeyDown(KeyCode.Q))
+            GoToMainMenu();
+        if (!isGameOver && Input.GetKeyDown(KeyCode.P))
+            TogglePause();
+    }
+
+    void TogglePause()
+    {
+        isPaused = !isPaused;
+        Time.timeScale = isPaused ? 0f : 1f;
+        UIManager.Instance?.ShowPauseText(isPaused);
     }
 
     public void AddScore(int amount)
@@ -37,7 +58,10 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        isGameOver = true;
         Time.timeScale = 0f;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
         UIManager.Instance?.ShowGameOver(score);
     }
 
@@ -48,36 +72,56 @@ public class GameManager : MonoBehaviour
 
         if (currentLevelIndex < levelScenes.Length)
         {
-            UIManager.Instance?.ShowSectorCleared(currentLevelIndex);
-            Invoke(nameof(LoadNextLevel), 3f);
+            StartCoroutine(LoadNextLevelDelayed(0f));
         }
         else
         {
             persistedScore = 0;
             persistedLevelIndex = 0;
-            Invoke(nameof(LoadMainMenu), 3f);
             UIManager.Instance?.ShowVictory(score);
+            StartCoroutine(LoadMainMenuDelayed(3f));
         }
     }
 
-    void LoadNextLevel()
+    IEnumerator LoadNextLevelDelayed(float delay)
     {
+        yield return new WaitForSecondsRealtime(delay);
         Time.timeScale = 1f;
-        SceneManager.LoadScene(levelScenes[currentLevelIndex]);
+        string announcement = $"<size=44><color=#FFD700>SECTOR CLEARED</color></size>\n<size=22><color=#555555>- - - - - - - - - - - - - -</color></size>\n<size=28><color=#00CFFF>ENTERING SECTOR {currentLevelIndex + 1}</color></size>";
+        if (SceneTransition.Instance != null)
+            SceneTransition.Instance.LoadScene(levelScenes[currentLevelIndex], announcement);
+        else
+            SceneManager.LoadScene(levelScenes[currentLevelIndex]);
     }
 
-    void LoadMainMenu()
+    IEnumerator LoadMainMenuDelayed(float delay)
     {
+        yield return new WaitForSecondsRealtime(delay);
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        if (SceneTransition.Instance != null)
+            SceneTransition.Instance.LoadScene("MainMenu");
+        else
+            SceneManager.LoadScene("MainMenu");
     }
 
     public void RestartGame()
     {
+        isGameOver = false;
         persistedScore = 0;
         persistedLevelIndex = 0;
+        PlayerHealth.ResetHealth();
         Time.timeScale = 1f;
         SceneManager.LoadScene(levelScenes[0]);
+    }
+
+    public void GoToMainMenu()
+    {
+        isGameOver = false;
+        persistedScore = 0;
+        persistedLevelIndex = 0;
+        PlayerHealth.ResetHealth();
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void QuitGame() => Application.Quit();

@@ -34,6 +34,10 @@ public class UIManager : MonoBehaviour
     [Header("Power-up Pickup")]
     public TextMeshProUGUI powerUpPickupText;
 
+    [Header("Pause")]
+    public TextMeshProUGUI pauseHintText;
+    public GameObject pauseOverlay;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -45,6 +49,7 @@ public class UIManager : MonoBehaviour
         if (waveAnnouncementText != null) waveAnnouncementText.gameObject.SetActive(false);
         if (powerUpPickupText != null) powerUpPickupText.gameObject.SetActive(false);
         if (screenFlashImage != null) screenFlashImage.color = new Color(0, 0, 0, 0);
+        if (pauseOverlay != null) pauseOverlay.SetActive(false);
     }
 
     public void UpdateHealthUI(int current, int max)
@@ -85,7 +90,7 @@ public class UIManager : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < 0.4f)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float a = Mathf.Lerp(flashColor.a, 0f, elapsed / 0.4f);
             screenFlashImage.color = new Color(flashColor.r, flashColor.g, flashColor.b, a);
             yield return null;
@@ -121,7 +126,29 @@ public class UIManager : MonoBehaviour
     public void ShowGameOver(int score)
     {
         if (gameOverScreen) gameOverScreen.SetActive(true);
-        if (gameOverScoreText) gameOverScoreText.text = $"Score: {score}";
+
+        if (gameOverScoreText)
+        {
+            gameOverScoreText.text = $"FINAL SCORE\n<size=150%><color=#FFD700>{score}</color></size>";
+        }
+        else if (gameOverScreen != null)
+        {
+            // Create score text inside GameOverScreen if not wired
+            var go = new GameObject("GameOverScore");
+            go.transform.SetParent(gameOverScreen.transform, false);
+            var tmp = go.AddComponent<TMPro.TextMeshProUGUI>();
+            tmp.text = $"FINAL SCORE\n<size=150%><color=#FFD700>{score}</color></size>";
+            tmp.fontSize = 28;
+            tmp.alignment = TMPro.TextAlignmentOptions.Center;
+            tmp.color = Color.white;
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = new Vector2(0, -120f);
+            rt.sizeDelta = new Vector2(400f, 80f);
+            gameOverScoreText = tmp;
+        }
+
+        if (scoreText) scoreText.text = $"Score: {score}";
     }
 
     public void ShowVictory(int score)
@@ -132,15 +159,32 @@ public class UIManager : MonoBehaviour
 
     public void ShowSectorCleared(int nextLevelIndex)
     {
-        if (sectorClearedScreen) sectorClearedScreen.SetActive(true);
+        if (sectorClearedScreen)
+        {
+            sectorClearedScreen.SetActive(true);
+            // Force dark background regardless of Inspector setting
+            var bg = sectorClearedScreen.GetComponent<Image>();
+            if (bg != null) bg.color = new Color(0f, 0f, 0f, 0.92f);
+        }
         if (sectorClearedText)
-            sectorClearedText.text = $"SECTOR CLEARED\nEntering Sector {nextLevelIndex + 1}...";
-        Invoke(nameof(HideSectorCleared), 2.5f);
+        {
+            sectorClearedText.text = $"SECTOR CLEARED\n— ENTERING SECTOR {nextLevelIndex + 1} —";
+            sectorClearedText.color = new Color(1f, 0.85f, 0f); // yellow
+            sectorClearedText.fontSize = 72;
+        }
     }
 
     void HideSectorCleared()
     {
         if (sectorClearedScreen) sectorClearedScreen.SetActive(false);
+    }
+
+    public void ShowPauseText(bool paused)
+    {
+        if (pauseHintText != null)
+            pauseHintText.text = paused ? "PAUSED — Press P to Resume" : "Press P to Pause";
+        if (pauseOverlay != null)
+            pauseOverlay.SetActive(paused);
     }
 
     public void ShowWaveAnnouncement(int wave, int total)
@@ -159,11 +203,13 @@ public class UIManager : MonoBehaviour
             waveAnnouncementText.gameObject.SetActive(false);
     }
 
-    public void ShowPowerUpText(string message)
+    public void ShowPowerUpText(string message, Color color)
     {
         if (powerUpPickupText == null) return;
         StopCoroutine(nameof(FadePowerUpText));
-        powerUpPickupText.text = message;
+        string hex = ColorUtility.ToHtmlStringRGB(color);
+        powerUpPickupText.text = $"<color=#{hex}>{message}</color>";
+        powerUpPickupText.color = Color.white;
         powerUpPickupText.gameObject.SetActive(true);
         StartCoroutine(FadePowerUpText());
     }
