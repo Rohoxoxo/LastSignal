@@ -1614,14 +1614,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
-  - enemyCount: 8
-    spawnInterval: 2
-    enemyTypeIndex: 0
-  - enemyCount: 12
-    spawnInterval: 1
-    enemyTypeIndex: 0
   - enemyCount: 16
-    spawnInterval: 0.7
+    spawnInterval: 1.7
+    enemyTypeIndex: 0
+  - enemyCount: 20
+    spawnInterval: 1.2
+    enemyTypeIndex: 0
+  - enemyCount: 20
+    spawnInterval: 0.5
     enemyTypeIndex: 0
 --- !u!4 &857971851
 Transform:
