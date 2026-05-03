@@ -11,7 +11,7 @@ public class ShieldVisual : MonoBehaviour
         shieldBubble = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         shieldBubble.transform.SetParent(transform);
         shieldBubble.transform.localPosition = Vector3.zero;
-        shieldBubble.transform.localScale = Vector3.one * 2.2f;
+        shieldBubble.transform.localScale = Vector3.one * 1.4f;
 
         // Remove collider so it doesn't interfere with physics
         Destroy(shieldBubble.GetComponent<Collider>());
@@ -26,7 +26,7 @@ public class ShieldVisual : MonoBehaviour
         mat.EnableKeyword("_ALPHABLEND_ON");
         mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
         mat.renderQueue = 3000;
-        mat.color = new Color(0.1f, 0.5f, 1f, 0.22f);
+        mat.color = new Color(0.1f, 0.5f, 1f, 0.1f);
         mat.EnableKeyword("_EMISSION");
         mat.SetColor("_EmissionColor", new Color(0f, 0.6f, 1.5f));
         shieldBubble.GetComponent<Renderer>().material = mat;
